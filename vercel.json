@@ -1,0 +1,6 @@
+{
+  "functions": {
+    "api/meetings.js": { "maxDuration": 30 },
+    "api/regenerate-summary.js": { "maxDuration": 30 }
+  }
+}
