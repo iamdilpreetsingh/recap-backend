@@ -1,15 +1,22 @@
 import { waitUntil } from "@vercel/functions";
 import { adminDb } from "../lib/firebaseAdmin.js";
 import { verifyAuth } from "../lib/authMiddleware.js";
-import { generateSummary } from "../lib/gemini.js";
 
-async function generateAndSaveSummary(meetingRef, title, captions) {
-  try {
-    const summary = await generateSummary(title, captions);
-    await meetingRef.update({ summary });
-  } catch (err) {
-    console.error("[Recap] Background summary generation failed:", err);
-  }
+function triggerSummaryGeneration(meetingId) {
+  const selfUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
+  return fetch(`${selfUrl}/api/internal-generate-summary`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-internal-secret": process.env.INTERNAL_API_SECRET,
+    },
+    body: JSON.stringify({ meetingId }),
+  }).catch((err) =>
+    console.error("[Recap] Failed to dispatch summary trigger:", err),
+  );
 }
 
 export default async function handler(req, res) {
@@ -50,7 +57,7 @@ export default async function handler(req, res) {
     summary: null,
   });
 
-  waitUntil(generateAndSaveSummary(meetingRef, title, captions));
+  waitUntil(triggerSummaryGeneration(id));
 
   return res.status(200).json({ ok: true });
 }
