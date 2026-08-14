@@ -1,23 +1,20 @@
+import { waitUntil } from "@vercel/functions";
 import { adminDb } from "../lib/firebaseAdmin.js";
 import { verifyAuth } from "../lib/authMiddleware.js";
 
 const PUBLIC_BACKEND_URL = "https://recap-backend-five.vercel.app";
 
-async function triggerSummaryGeneration(meetingId) {
-  try {
-    const res = await fetch(`${PUBLIC_BACKEND_URL}/api/internal-generate-summary`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": process.env.INTERNAL_API_SECRET,
-      },
-      body: JSON.stringify({ meetingId }),
-    });
-    const body = await res.text();
-    return { status: res.status, body };
-  } catch (err) {
-    return { status: null, body: `fetch threw: ${err.message}` };
-  }
+function triggerSummaryGeneration(meetingId) {
+  return fetch(`${PUBLIC_BACKEND_URL}/api/internal-generate-summary`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-internal-secret": process.env.INTERNAL_API_SECRET,
+    },
+    body: JSON.stringify({ meetingId }),
+  }).catch((err) =>
+    console.error("[Recap] Failed to dispatch summary trigger:", err),
+  );
 }
 
 export default async function handler(req, res) {
@@ -58,7 +55,7 @@ export default async function handler(req, res) {
     summary: null,
   });
 
-  const debugTrigger = await triggerSummaryGeneration(id);
+  waitUntil(triggerSummaryGeneration(id));
 
-  return res.status(200).json({ ok: true, debugTrigger });
+  return res.status(200).json({ ok: true });
 }
