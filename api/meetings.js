@@ -1,6 +1,5 @@
 import { adminDb } from "../lib/firebaseAdmin.js";
 import { verifyAuth } from "../lib/authMiddleware.js";
-import { generateSummary } from "../lib/gemini.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -40,13 +39,5 @@ export default async function handler(req, res) {
     summary: null,
   });
 
-  let summary = null;
-  try {
-    summary = await generateSummary(title, captions);
-    await meetingRef.update({ summary });
-  } catch (err) {
-    console.error("Summary generation failed:", err);
-  }
-
-  return res.status(200).json({ ok: true, summary });
+  return res.status(200).json({ ok: true });
 }
