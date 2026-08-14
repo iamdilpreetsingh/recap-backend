@@ -1,5 +1,16 @@
+import { waitUntil } from "@vercel/functions";
 import { adminDb } from "../lib/firebaseAdmin.js";
 import { verifyAuth } from "../lib/authMiddleware.js";
+import { generateSummary } from "../lib/gemini.js";
+
+async function generateAndSaveSummary(meetingRef, title, captions) {
+  try {
+    const summary = await generateSummary(title, captions);
+    await meetingRef.update({ summary });
+  } catch (err) {
+    console.error("[Recap] Background summary generation failed:", err);
+  }
+}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -38,6 +49,8 @@ export default async function handler(req, res) {
     captions,
     summary: null,
   });
+
+  waitUntil(generateAndSaveSummary(meetingRef, title, captions));
 
   return res.status(200).json({ ok: true });
 }
