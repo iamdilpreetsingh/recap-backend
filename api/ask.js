@@ -1,3 +1,4 @@
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "../lib/firebaseAdmin.js";
 import { verifyAuth } from "../lib/authMiddleware.js";
 import { embedQuery } from "../lib/embeddings.js";
@@ -49,6 +50,17 @@ export default async function handler(req, res) {
     const queryVector = await embedQuery(question);
     const relevantChunks = topKChunks(queryVector, meeting.chunks, 5);
     const answer = await answerFromChunks(question, relevantChunks);
+
+    await adminDb
+      .collection("meetings")
+      .doc(meetingId)
+      .update({
+        chatHistory: FieldValue.arrayUnion(
+          { role: "user", text: question },
+          { role: "assistant", text: answer },
+        ),
+      });
+
     return res.status(200).json({ answer });
   } catch (err) {
     console.error("[Recap] Ask failed:", err);

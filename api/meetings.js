@@ -54,6 +54,7 @@ export default async function handler(req, res) {
     captions,
     summary: null,
     chunks: [],
+    chatHistory: [],
   });
 
   waitUntil(triggerBackgroundJob("/api/internal-generate-summary", id));
