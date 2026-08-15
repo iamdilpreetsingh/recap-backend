@@ -4,8 +4,8 @@ import { verifyAuth } from "../lib/authMiddleware.js";
 
 const PUBLIC_BACKEND_URL = "https://recap-backend-five.vercel.app";
 
-function triggerSummaryGeneration(meetingId) {
-  return fetch(`${PUBLIC_BACKEND_URL}/api/internal-generate-summary`, {
+function triggerBackgroundJob(path, meetingId) {
+  return fetch(`${PUBLIC_BACKEND_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -13,7 +13,7 @@ function triggerSummaryGeneration(meetingId) {
     },
     body: JSON.stringify({ meetingId }),
   }).catch((err) =>
-    console.error("[Recap] Failed to dispatch summary trigger:", err),
+    console.error(`[Recap] Failed to dispatch job ${path}:`, err),
   );
 }
 
@@ -53,9 +53,11 @@ export default async function handler(req, res) {
     endedAt: endedAt ?? null,
     captions,
     summary: null,
+    chunks: [],
   });
 
-  waitUntil(triggerSummaryGeneration(id));
+  waitUntil(triggerBackgroundJob("/api/internal-generate-summary", id));
+  waitUntil(triggerBackgroundJob("/api/internal-generate-chunks", id));
 
   return res.status(200).json({ ok: true });
 }

@@ -2,6 +2,8 @@
   "functions": {
     "api/meetings.js": { "maxDuration": 10 },
     "api/regenerate-summary.js": { "maxDuration": 30 },
-    "api/internal-generate-summary.js": { "maxDuration": 30 }
+    "api/internal-generate-summary.js": { "maxDuration": 30 },
+    "api/internal-generate-chunks.js": { "maxDuration": 30 },
+    "api/ask.js": { "maxDuration": 30 }
   }
 }
