@@ -3,9 +3,25 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "node --watch src/app.js runserver",
+    "start": "node src/app.js runserver"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@vercel/functions": "^1.5.0",
-    "firebase-admin": "^13.0.2"
+    "commander": "^13.1.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "firebase-admin": "^13.0.2",
+    "helmet": "^8.3.0",
+    "joi": "^17.13.4",
+    "pg": "^8.13.1",
+    "pgvector": "^0.2.0"
   }
 }
